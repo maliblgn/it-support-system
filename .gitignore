@@ -1,0 +1,67 @@
+# Secrets and machine-local configuration
+.env
+.env.*
+!.env.example
+!.env.production.example
+*.key
+*.pem
+*.pfx
+*.p12
+*.cer
+*.crt
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+.coverage.*
+
+# Node / Vite
+frontend/node_modules/
+frontend/dist/
+frontend/coverage/
+*.tsbuildinfo
+
+# Runtime data: never publish databases, uploads, or logs
+backend/data/
+uploads/
+logs/
+*.bak
+*.bacpac
+*.mdf
+*.ldf
+*.jsonl
+*.log
+
+# Build and release outputs
+build/
+dist/
+outputs/
+
+# IDE / operating system files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Codex-local working files
+.codex-temp/
+
+# Original internal planning artifacts are intentionally kept out of the
+# public source repository. Public, product-neutral documentation lives in
+# README.md and will be expanded under docs/.
+/Arayüz Tasarım Sistemi ve Ekran Envanteri.md
+/Bilgi İşlem Görev Takip.md
+/Bilgi İşlem Görev Takip Sistemi Mind Map.png
+/Bilgi İşlem Görev Takip Sistemi Veri Modeli ve Alan Tanımları.xlsx
+/FEATURE_ENHANCEMENT_SPEC.md
+/FEATURE_ENHANCEMENT_STATUS.md
+/V1 Karar ve Kapsam Belgesi.md
