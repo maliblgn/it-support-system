@@ -4,8 +4,9 @@ import os
 from dataclasses import dataclass
 
 from sqlalchemy import select
+from sqlalchemy.orm import Session
 
-from app.core.config import get_settings
+from app.core.config import Settings, get_settings
 from app.core.security import hash_password, validate_allowed_email
 from app.db.session import get_session_factory
 from app.models.entities import User
@@ -29,13 +30,8 @@ def _environment_value(name: str, default: str | None = None) -> str:
     return value
 
 
-def main() -> int:
-    settings = get_settings()
-    if not settings.demo_mode:
-        raise SystemExit("Demo hesapları yalnızca APP_DEMO_MODE=true iken oluşturulabilir.")
-
+def load_demo_accounts(settings: Settings) -> list[DemoAccount]:
     domain = settings.allowed_email_domains[0]
-    password = _environment_value("DEMO_ACCOUNT_PASSWORD")
     accounts = [
         DemoAccount(
             email=_environment_value("DEMO_USER_EMAIL", f"demo.user@{domain}"),
@@ -80,40 +76,74 @@ def main() -> int:
             "Demo hesaplarının tamamı APP_DEMO_PROTECTED_EMAILS içinde olmalıdır: "
             + ", ".join(missing_protection)
         )
+    return normalized_accounts
+
+
+def sync_demo_accounts(
+    session: Session,
+    settings: Settings,
+    password: str,
+    *,
+    restore_existing: bool = False,
+) -> tuple[list[User], int]:
+    accounts = load_demo_accounts(settings)
+    users: list[User] = []
+    created_count = 0
+    for account in accounts:
+        existing = session.scalar(select(User).where(User.email == account.email))
+        if existing is not None:
+            if not restore_existing and existing.role != account.role.value:
+                raise SystemExit(
+                    f"{account.email} hesabı beklenen {account.role.value} rolünde değil."
+                )
+            if restore_existing:
+                existing.password_hash = hash_password(password, settings)
+                existing.first_name = account.first_name
+                existing.last_name = account.last_name
+                existing.phone = None
+                existing.department = account.department
+                existing.role = account.role.value
+                existing.is_active = True
+                existing.must_change_password = False
+            users.append(existing)
+            continue
+
+        user = User(
+            email=account.email,
+            password_hash=hash_password(password, settings),
+            first_name=account.first_name,
+            last_name=account.last_name,
+            phone=None,
+            department=account.department,
+            role=account.role.value,
+            is_active=True,
+            must_change_password=False,
+        )
+        session.add(user)
+        session.flush()
+        record_audit_event(
+            session,
+            None,
+            "DEMO_ACCOUNT_CREATED",
+            "USER",
+            user.id,
+            {"email": user.email, "role": user.role},
+        )
+        users.append(user)
+        created_count += 1
+    return users, created_count
+
+
+def main() -> int:
+    settings = get_settings()
+    if not settings.demo_mode:
+        raise SystemExit("Demo hesapları yalnızca APP_DEMO_MODE=true iken oluşturulabilir.")
+
+    password = _environment_value("DEMO_ACCOUNT_PASSWORD")
 
     session = get_session_factory()()
-    created_count = 0
     try:
-        for account in normalized_accounts:
-            existing = session.scalar(select(User).where(User.email == account.email))
-            if existing is not None:
-                if existing.role != account.role.value:
-                    raise SystemExit(
-                        f"{account.email} hesabı beklenen {account.role.value} rolünde değil."
-                    )
-                continue
-            user = User(
-                email=account.email,
-                password_hash=hash_password(password, settings),
-                first_name=account.first_name,
-                last_name=account.last_name,
-                phone=None,
-                department=account.department,
-                role=account.role.value,
-                is_active=True,
-                must_change_password=False,
-            )
-            session.add(user)
-            session.flush()
-            record_audit_event(
-                session,
-                None,
-                "DEMO_ACCOUNT_CREATED",
-                "USER",
-                user.id,
-                {"email": user.email, "role": user.role},
-            )
-            created_count += 1
+        _, created_count = sync_demo_accounts(session, settings, password)
         session.commit()
     except BaseException:
         session.rollback()

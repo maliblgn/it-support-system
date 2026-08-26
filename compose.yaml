@@ -79,6 +79,24 @@ services:
         condition: service_completed_successfully
     restart: "no"
 
+  demo-reset:
+    profiles: ["tools"]
+    build:
+      context: ./backend
+    environment:
+      <<: *backend-environment
+      DEMO_ACCOUNT_PASSWORD: ${DEMO_ACCOUNT_PASSWORD:?DEMO_ACCOUNT_PASSWORD gerekli}
+      DEMO_USER_EMAIL: demo.user@example.com
+      DEMO_IT_EMAIL: demo.it@example.com
+      DEMO_ADMIN_EMAIL: demo.admin@example.com
+    command: ["python", "-m", "app.cli.reset_demo", "--confirm", "RESET-DEMO"]
+    volumes:
+      - app_uploads:/data/uploads
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: "no"
+
   backend:
     build:
       context: ./backend

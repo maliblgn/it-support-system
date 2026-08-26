@@ -57,6 +57,19 @@ Authentication`, kullanıcı `sa` ve parola `.env.compose.example` içindeki
 `MSSQL_SA_PASSWORD` değeridir. Yerel sertifika kullanıldığı için **Trust server
 certificate** seçili olmalıdır.
 
+## Kontrollü demo sıfırlama
+
+Demo hesaplarını başlangıç parolasına döndürmek; sonradan oluşan kullanıcıları, talepleri,
+bildirimleri ve dosya eklerini temizlemek; dört örnek talebi yeniden kurmak için:
+
+```powershell
+docker compose --env-file .env.compose.example --profile tools run --rm demo-reset
+```
+
+Komut yalnızca `APP_DEMO_MODE=true` olduğunda ve açık `RESET-DEMO` onayıyla çalışır. Veritabanı
+ilişkilerini güvenli sırada temizler, yalnızca korunan üç demo hesabını saklar ve upload
+volume'ünü başlangıç durumuna döndürür. Bu işlem demo verileri için geri alınamaz.
+
 ## Durdurma
 
 Container'ları durdurup verileri korumak için:

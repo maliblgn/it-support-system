@@ -83,6 +83,10 @@ Servisler hazır olduğunda uygulamayı <http://localhost:8080> adresinden açı
 `DEMO_ACCOUNT_PASSWORD` değeridir. Bu örnek değer yalnızca yerel demo içindir; gerçek yayın
 ortamında mutlaka farklı ve güvenli secret değerleri kullanılmalıdır.
 
+Demo verilerini korunan hesaplar ve örnek taleplerle başlangıç durumuna döndürmek için
+[container rehberindeki kontrollü sıfırlama](deployment/CONTAINERS.md#kontrollü-demo-sıfırlama)
+komutunu kullanın.
+
 Container durumlarını görmek için:
 
 ```powershell

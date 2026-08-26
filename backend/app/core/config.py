@@ -169,6 +169,10 @@ class Settings(BaseSettings):
                 insecure.append("SMTP host ve gönderici ayarları")
             if self.demo_mode and not self.demo_protected_emails:
                 insecure.append("demo_mode için en az bir demo_protected_emails hesabı")
+            if self.demo_mode and self.public_registration_enabled:
+                insecure.append("demo_mode için public_registration_enabled=false")
+            if self.demo_mode and self.email_delivery_enabled:
+                insecure.append("demo_mode için email_delivery_enabled=false")
             if not self.cors_origins or any(
                 (parts := urlsplit(origin)).scheme.casefold() != "https"
                 or not parts.netloc

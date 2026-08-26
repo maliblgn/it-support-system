@@ -244,6 +244,20 @@ adresleriyle eşleşmesi gerekir. Liste boş bırakılırsa tüm aktif IT hesapl
 | `GET` | `/api/notifications` | Oturum sahibinin bildirimlerini sayfalı listeler |
 | `PATCH` | `/api/notifications/{id}/read` | Oturum sahibinin bildirimini okundu işaretler |
 
+## Public demo sıfırlama
+
+İnternete açık ortak demo ortamını korunan USER, IT ve ADMIN hesapları ile dört örnek talebe
+döndürmek için aşağıdaki yönetim komutu kullanılır:
+
+```powershell
+python -m app.cli.reset_demo --confirm RESET-DEMO
+```
+
+Komut yalnızca `APP_DEMO_MODE=true` olduğunda çalışır. Korunmayan kullanıcıları ve operasyon
+verilerini kalıcı olarak siler, demo profilleri ile parolalarını environment değerlerinden
+yeniler ve `APP_UPLOAD_ROOT` içeriğini temizler. Bu nedenle yalnızca ayrı bir demo veritabanı
+ve dosya alanında, zamanlanmış yönetim işi olarak çalıştırılmalıdır.
+
 ## Raporlama
 
 Rapor endpoint'leri `IT` ve `ADMIN` rollerine açıktır. `period=today|week|month|custom` parametresi

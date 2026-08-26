@@ -139,6 +139,34 @@ def test_production_demo_mode_requires_protected_accounts() -> None:
         Settings(**production_settings(demo_mode=True, demo_protected_emails=[]))
 
 
+def test_public_production_demo_disables_registration_and_email_delivery() -> None:
+    protected = ["demo.user@example.com"]
+    settings = Settings(
+        **production_settings(
+            demo_mode=True,
+            demo_protected_emails=protected,
+            public_registration_enabled=False,
+            email_delivery_enabled=False,
+            smtp_host=None,
+            mail_from=None,
+        )
+    )
+    assert settings.demo_mode is True
+
+    for field in ("public_registration_enabled", "email_delivery_enabled"):
+        changes = {
+            "demo_mode": True,
+            "demo_protected_emails": protected,
+            "public_registration_enabled": False,
+            "email_delivery_enabled": False,
+            "smtp_host": None,
+            "mail_from": None,
+        }
+        changes[field] = True
+        with pytest.raises(ValidationError, match=field):
+            Settings(**production_settings(**changes))
+
+
 @pytest.mark.parametrize(
     ("field", "value"),
     [
