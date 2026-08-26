@@ -15,9 +15,20 @@ edilmez.
 
 ## Hızlı başlatma
 
-Önce [backend kurulumunu](backend/README.md), ardından [frontend kurulumunu](frontend/README.md)
-tamamlayın. Uygulama çalışma ortamında MSSQL kullanır; makineye özel bağlantı ve secret değerleri
-yalnızca Git tarafından izlenmeyen `backend/.env` dosyasında tutulur.
+Çalışan MSSQL dâhil tüm sistemi en hızlı biçimde Docker Compose ile açabilirsiniz:
+
+```powershell
+docker compose --env-file .env.compose.example up --build -d
+```
+
+Uygulama hazır olduğunda <http://localhost:8080> adresinde çalışır. Ayrıntılı başlangıç,
+demo hesap, SSMS ve sorun giderme adımları için [container rehberini](deployment/CONTAINERS.md)
+kullanın.
+
+Container kullanmadan geliştirmek için önce [backend kurulumunu](backend/README.md), ardından
+[frontend kurulumunu](frontend/README.md) tamamlayın. Uygulama çalışma ortamında MSSQL kullanır;
+makineye özel bağlantı ve secret değerleri yalnızca Git tarafından izlenmeyen `backend/.env`
+dosyasında tutulur.
 
 Üretim ortamında migration çalıştırılmalı, ilk ADMIN hesabı CLI ile açılmalı ve secret, MSSQL,
 upload, log, SMTP, HTTPS/cookie ile CORS ayarları yayın ortamına göre tanımlanmalıdır. IT ve

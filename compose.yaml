@@ -1,0 +1,120 @@
+name: destek-takip
+
+x-backend-environment: &backend-environment
+  APP_APP_NAME: Destek Takip API
+  APP_ENVIRONMENT: development
+  APP_DEBUG: "false"
+  APP_LOG_LEVEL: INFO
+  APP_LOG_FILE: /data/logs/application.jsonl
+  APP_DATABASE_SERVER: db
+  APP_DATABASE_PORT: "1433"
+  APP_DATABASE_NAME: DestekTakip
+  APP_DATABASE_DRIVER: ODBC Driver 18 for SQL Server
+  APP_DATABASE_TRUSTED_CONNECTION: "false"
+  APP_DATABASE_USERNAME: destek_app
+  APP_DATABASE_PASSWORD: ${APP_DATABASE_PASSWORD:?APP_DATABASE_PASSWORD gerekli}
+  APP_DATABASE_ENCRYPT: "true"
+  APP_DATABASE_TRUST_SERVER_CERTIFICATE: "true"
+  APP_DATABASE_CONNECTION_TIMEOUT_SECONDS: "10"
+  APP_API_PREFIX: /api
+  APP_CORS_ORIGINS: '["http://localhost:${WEB_PORT:-8080}","http://127.0.0.1:${WEB_PORT:-8080}"]'
+  APP_ALLOWED_EMAIL_DOMAINS: '["example.com"]'
+  APP_PUBLIC_REGISTRATION_ENABLED: "false"
+  APP_DEMO_MODE: "true"
+  APP_DEMO_PROTECTED_EMAILS: '["demo.user@example.com","demo.it@example.com","demo.admin@example.com"]'
+  APP_SESSION_SECRET: ${APP_SESSION_SECRET:?APP_SESSION_SECRET gerekli}
+  APP_SESSION_COOKIE_SECURE: "false"
+  APP_UPLOAD_ROOT: /data/uploads
+  APP_MAX_ATTACHMENT_SIZE_MB: "10"
+  APP_MAX_ATTACHMENTS_PER_TICKET: "5"
+  APP_EMAIL_DELIVERY_ENABLED: "false"
+  APP_IT_NOTIFICATION_RECIPIENTS: "[]"
+
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: Developer
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:?MSSQL_SA_PASSWORD gerekli}
+      MSSQL_DB: DestekTakip
+      MSSQL_USER: destek_app
+      MSSQL_PASSWORD: ${APP_DATABASE_PASSWORD:?APP_DATABASE_PASSWORD gerekli}
+    ports:
+      - "127.0.0.1:${MSSQL_HOST_PORT:-14330}:1433"
+    volumes:
+      - mssql_data:/var/opt/mssql
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - /opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa -P "$$MSSQL_SA_PASSWORD" -Q "SELECT 1" -b -o /dev/null
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+    restart: unless-stopped
+
+  migrate:
+    build:
+      context: ./backend
+    environment: *backend-environment
+    command: ["python", "-m", "alembic", "upgrade", "head"]
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  demo-seed:
+    build:
+      context: ./backend
+    environment:
+      <<: *backend-environment
+      DEMO_ACCOUNT_PASSWORD: ${DEMO_ACCOUNT_PASSWORD:?DEMO_ACCOUNT_PASSWORD gerekli}
+      DEMO_USER_EMAIL: demo.user@example.com
+      DEMO_IT_EMAIL: demo.it@example.com
+      DEMO_ADMIN_EMAIL: demo.admin@example.com
+    command: ["python", "-m", "app.cli.seed_demo"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: "no"
+
+  backend:
+    build:
+      context: ./backend
+    environment: *backend-environment
+    volumes:
+      - app_uploads:/data/uploads
+      - app_logs:/data/logs
+    depends_on:
+      demo-seed:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health/ready', timeout=3)
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_APP_NAME: Destek Takip
+        VITE_PUBLIC_REGISTRATION_ENABLED: "false"
+    ports:
+      - "127.0.0.1:${WEB_PORT:-8080}:8080"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  mssql_data:
+  app_uploads:
+  app_logs:

@@ -37,7 +37,7 @@ def update_profile(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     except ValueError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)
+            status_code=422, detail=str(exc)
         ) from exc
     return UserRead.model_validate(user)
 
@@ -65,6 +65,6 @@ def change_password(
         ) from exc
     except ValueError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(exc)
+            status_code=422, detail=str(exc)
         ) from exc
     return UserRead.model_validate(user)

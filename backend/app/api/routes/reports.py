@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, Query, Response, status
+from fastapi import APIRouter, HTTPException, Query, Response
 
 from app.api.dependencies import DatabaseSession, ItOrAdminUser, ItUser
 from app.schemas.report import ItDashboardRead, ReportPeriod, ReportSummary
@@ -23,7 +23,7 @@ def dashboard(current_user: ItUser, session: DatabaseSession) -> ItDashboardRead
 
 def _validation_error(exc: ReportValidationError) -> HTTPException:
     return HTTPException(
-        status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+        status_code=422,
         detail=str(exc),
     )
 

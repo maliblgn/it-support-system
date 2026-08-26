@@ -61,7 +61,7 @@ def register(
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=str(exc)) from exc
     except ValueError as exc:
         raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_CONTENT,
+            status_code=422,
             detail=str(exc),
         ) from exc
     set_auth_cookies(response, user.id, settings)
