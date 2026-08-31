@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import pytest
 
@@ -13,8 +14,11 @@ from app.db.session import dispose_engine, get_engine  # noqa: E402
 
 
 @pytest.fixture(autouse=True)
-def isolated_database() -> None:
-    """Her test için temiz ve paylaşımlı bir bellek içi SQLite şeması sağlar."""
+def isolated_database(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    """Her test için temiz SQLite şeması ve yazılabilir upload alanı sağlar."""
+    upload_root = tmp_path / "default-uploads"
+    upload_root.mkdir()
+    monkeypatch.setenv("APP_UPLOAD_ROOT", str(upload_root))
     get_settings.cache_clear()
     dispose_engine()
     engine = get_engine()

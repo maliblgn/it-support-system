@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     )
 
     app_name: str = "Destek Takip API"
-    app_version: str = "0.6.0"
+    app_version: str = "0.7.0"
     environment: str = "development"
     debug: bool = False
     log_level: str = "INFO"
@@ -31,7 +31,7 @@ class Settings(BaseSettings):
     demo_protected_emails: list[str] = Field(default_factory=list)
 
     session_secret: SecretStr = SecretStr(
-        "development-only-change-this-session-secret-before-production"
+        "development-only-change-this-session-secret"
     )
     session_lifetime_hours: int = Field(default=8, ge=1, le=24)
     session_cookie_name: str = "it_ticket_session"

@@ -1,5 +1,7 @@
 # Destek Takip
 
+> Güncel sürüm: `0.7.0` — yalnızca yerel kullanım
+
 Teknik destek taleplerinin oluşturulması, doğru IT çalışanına atanması, çözüm sürecinin
 izlenmesi ve operasyonun raporlanması için geliştirilmiş rol tabanlı bir web uygulaması.
 React arayüzü, FastAPI REST API'si ve Microsoft SQL Server veri katmanı tek bir sistem olarak
@@ -80,8 +82,7 @@ Servisler hazır olduğunda uygulamayı <http://localhost:8080> adresinden açı
 | Yönetici | `demo.admin@example.com` |
 
 Üç hesabın ortak yerel parolası `.env.compose.example` içindeki
-`DEMO_ACCOUNT_PASSWORD` değeridir. Bu örnek değer yalnızca yerel demo içindir; gerçek yayın
-ortamında mutlaka farklı ve güvenli secret değerleri kullanılmalıdır.
+`DEMO_ACCOUNT_PASSWORD` değeridir. Bu hesaplar ve parola yalnızca yerel demo içindir.
 
 Demo verilerini korunan hesaplar ve örnek taleplerle başlangıç durumuna döndürmek için
 [container rehberindeki kontrollü sıfırlama](deployment/CONTAINERS.md#kontrollü-demo-sıfırlama)
@@ -142,15 +143,15 @@ npm run build
 .
 ├── backend/                FastAPI uygulaması, migration'lar ve backend testleri
 ├── frontend/               React arayüzü ve frontend testleri
-├── deployment/             Container, yayın, ön kontrol ve kabul belgeleri
+├── deployment/             Yerel container kurulum dosyaları
 ├── compose.yaml            Yerel uçtan uca çalışma ortamı
 ├── .env.compose.example    Secret içermeyen yerel örnek ayarlar
 └── README.md
 ```
 
-İlk analiz belgeleri, çalışma verileri ve makineye özel ortam dosyaları public kaynak paketine
-dâhil edilmez. Gerçek `.env`, veritabanı, upload, log ve kullanıcı dosyaları Git tarafından
-izlenmez.
+İlk analiz belgeleri, çalışma verileri ve makineye özel ortam dosyaları Git tarafından
+izlenmez. Gerçek `.env`, veritabanı, upload, log ve kullanıcı dosyaları proje kaynaklarından
+ayrı tutulur.
 
 ## Yapılandırma
 
@@ -159,34 +160,29 @@ Başlıca ayarlar environment değişkenleriyle yönetilir:
 | Değişken | Amaç |
 |---|---|
 | `APP_ALLOWED_EMAIL_DOMAINS` | Kayıt ve profil işlemlerinde izin verilen e-posta alan adları |
-| `APP_PUBLIC_REGISTRATION_ENABLED` | Public kullanıcı kaydını açar veya kapatır |
+| `APP_PUBLIC_REGISTRATION_ENABLED` | Yerel kullanıcı kaydını açar veya kapatır |
 | `APP_DEMO_MODE` | Paylaşılan demo hesaplarının korunmasını etkinleştirir |
 | `APP_DEMO_PROTECTED_EMAILS` | Korunacak demo hesaplarını belirler |
 | `APP_EMAIL_DELIVERY_ENABLED` | Uygulama içi bildirimlerden bağımsız SMTP teslimini yönetir |
-| `APP_SESSION_SECRET` | Oturum imzalama anahtarıdır; canlı ortamda güçlü ve gizli olmalıdır |
+| `APP_SESSION_SECRET` | Oturum imzalama anahtarıdır; yerel dosyada tutulmalı ve paylaşılmamalıdır |
 | `VITE_APP_NAME` | Arayüzde gösterilen ürün adını belirler |
 | `VITE_PUBLIC_REGISTRATION_ENABLED` | Kayıt bağlantısı ve ekranının build ayarıdır |
 
 Tüm backend ayarları için [backend dokümantasyonunu](backend/README.md) inceleyin.
 
-## Yayın durumu
+## Yerel çalışma durumu
 
 - [x] Rol bazlı web uygulaması ve REST API
 - [x] MSSQL şeması ve Alembic migration'ları
 - [x] Otomatik testler ve yerel Docker Compose ortamı
 - [x] Güvenli demo hesapları ve örnek yapılandırma
-- [ ] Azure üzerinde canlı demo altyapısı
-- [ ] GitHub Actions ile otomatik test ve dağıtım
-- [ ] Canlı USER, IT ve ADMIN kabul testleri
+- [x] USER, IT ve ADMIN için yerel demo verileri
+- [x] Yerel test, lint ve build komutları
 
-Windows/IIS için hazırlanmış alternatif yayın modeli, ön kontrol ve kabul adımları
-[deployment rehberinde](deployment/README.md) yer alır. Portföy demosunun planlanan bulut
-yayını Azure Container Apps, Azure SQL, Azure Files, Key Vault ve Log Analytics üzerine
-kurulacaktır.
+Proje yalnızca yerel kullanım için yapılandırılmıştır.
 
 ## Güvenlik notu
 
-Bu repository hiçbir gerçek kullanıcı parolası veya üretim secret'ı içermez. Örnek `.env`
-değerleri yalnızca yerel geliştirme içindir. Canlı ortamda secret'lar kaynak koddan ayrı
-tutulmalı; güvenli cookie, geçerli TLS, güvenilir SQL sertifikası, en az yetkili veritabanı
-hesabı ve kalıcı dosya depolaması kullanılmalıdır.
+Bu repository gerçek kullanıcı parolası içermez. Örnek `.env` değerleri yalnızca yerel
+geliştirme içindir ve başka sistemlerde tekrar kullanılmamalıdır. Yerel `.env`, veritabanı,
+upload ve log içerikleri kaynak koddan ayrı tutulmalıdır.

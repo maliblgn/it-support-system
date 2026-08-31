@@ -37,9 +37,6 @@ services:
       ACCEPT_EULA: "Y"
       MSSQL_PID: Developer
       MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:?MSSQL_SA_PASSWORD gerekli}
-      MSSQL_DB: DestekTakip
-      MSSQL_USER: destek_app
-      MSSQL_PASSWORD: ${APP_DATABASE_PASSWORD:?APP_DATABASE_PASSWORD gerekli}
     ports:
       - "127.0.0.1:${MSSQL_HOST_PORT:-14330}:1433"
     volumes:
@@ -54,14 +51,32 @@ services:
       start_period: 30s
     restart: unless-stopped
 
+  db-init:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:?MSSQL_SA_PASSWORD gerekli}
+      APP_DATABASE_PASSWORD: ${APP_DATABASE_PASSWORD:?APP_DATABASE_PASSWORD gerekli}
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - >-
+        /opt/mssql-tools18/bin/sqlcmd -C -S db -U sa -P "$$MSSQL_SA_PASSWORD"
+        -v APP_DATABASE_PASSWORD="$$APP_DATABASE_PASSWORD"
+        -i /init/init-database.sql -b
+    volumes:
+      - ./deployment/mssql/init-database.sql:/init/init-database.sql:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
   migrate:
     build:
       context: ./backend
     environment: *backend-environment
     command: ["python", "-m", "alembic", "upgrade", "head"]
     depends_on:
-      db:
-        condition: service_healthy
+      db-init:
+        condition: service_completed_successfully
     restart: "no"
 
   demo-seed:

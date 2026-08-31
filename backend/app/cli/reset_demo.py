@@ -1,4 +1,4 @@
-"""Public demo verisini güvenli bir başlangıç durumuna döndürür."""
+"""Yerel demo verisini güvenli bir başlangıç durumuna döndürür."""
 
 import argparse
 import shutil

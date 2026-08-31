@@ -41,7 +41,7 @@ kullanılmamalıdır.
 ```powershell
 docker compose --env-file .env.compose.example ps
 docker compose --env-file .env.compose.example logs -f backend frontend
-docker compose --env-file .env.compose.example logs db migrate demo-seed
+docker compose --env-file .env.compose.example logs db db-init migrate demo-seed
 ```
 
 Hazırlık kontrolleri:

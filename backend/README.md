@@ -19,7 +19,8 @@ python -m pip install -e ".[dev]"
 Copy-Item .env.example .env
 ```
 
-`.env` içindeki MSSQL değerlerini kuruma göre düzenleyin. Parola ve secret değerlerini repoya eklemeyin.
+`.env` içindeki MSSQL değerlerini yerel kurulumunuza göre düzenleyin. Parola ve secret
+değerlerini repoya eklemeyin.
 
 Yerel bir SQL Server Express named instance kullanılıyorsa sunucu adı ters eğik çizgiyle yazılır
 ve port eklenmez. Örnek:
@@ -33,7 +34,7 @@ APP_DATABASE_TRUST_SERVER_CERTIFICATE=true
 ```
 
 `APP_DATABASE_TRUST_SERVER_CERTIFICATE=true` yalnızca yerel, güvenilen geliştirme instance'ının
-self-signed sertifikası için uygundur. Üretimde geçerli sunucu sertifikasıyla `false` kullanılmalıdır.
+self-signed sertifikası için kullanılmalıdır.
 
 Kimlik doğrulama için özellikle şu değerleri ortama göre değiştirin:
 
@@ -43,8 +44,7 @@ APP_SESSION_SECRET=en-az-32-karakterlik-benzersiz-rastgele-bir-deger
 APP_UPLOAD_ROOT=D:/DestekTakip/uploads
 ```
 
-`APP_SESSION_COOKIE_SECURE` tanımlanmazsa production ortamında otomatik olarak `true`, diğer
-ortamlarda `false` olur.
+Yerel HTTP geliştirme ortamında `APP_SESSION_COOKIE_SECURE=false` kullanılabilir.
 
 ## Migration
 
@@ -103,9 +103,7 @@ MSSQL hazırlığı, upload alanı, çalışma süresi ve son güvenli olayları
 | `GET` | `/api/it/system/overview` | Uygulama, MSSQL, upload ve log özetini döndürür |
 | `GET` | `/api/it/system/logs` | Seviye ve limit filtreli merkezi logları döndürür |
 
-Bu endpoint'ler `IT` ve `ADMIN` rollerine açıktır. İleride kurumun SIEM/Seq/ELK altyapısı devreye
-alındığında JSON log dosyaları bir ajanla merkezi sisteme taşınabilir; uygulama kodu ve olay
-şeması değişmeden kalır.
+Bu endpoint'ler `IT` ve `ADMIN` rollerine açıktır.
 
 ## Kimlik doğrulama
 
@@ -244,10 +242,10 @@ adresleriyle eşleşmesi gerekir. Liste boş bırakılırsa tüm aktif IT hesapl
 | `GET` | `/api/notifications` | Oturum sahibinin bildirimlerini sayfalı listeler |
 | `PATCH` | `/api/notifications/{id}/read` | Oturum sahibinin bildirimini okundu işaretler |
 
-## Public demo sıfırlama
+## Yerel demo sıfırlama
 
-İnternete açık ortak demo ortamını korunan USER, IT ve ADMIN hesapları ile dört örnek talebe
-döndürmek için aşağıdaki yönetim komutu kullanılır:
+Yerel demo veritabanını korunan USER, IT ve ADMIN hesapları ile dört örnek talebe döndürmek
+için aşağıdaki yönetim komutu kullanılır:
 
 ```powershell
 python -m app.cli.reset_demo --confirm RESET-DEMO
@@ -255,8 +253,8 @@ python -m app.cli.reset_demo --confirm RESET-DEMO
 
 Komut yalnızca `APP_DEMO_MODE=true` olduğunda çalışır. Korunmayan kullanıcıları ve operasyon
 verilerini kalıcı olarak siler, demo profilleri ile parolalarını environment değerlerinden
-yeniler ve `APP_UPLOAD_ROOT` içeriğini temizler. Bu nedenle yalnızca ayrı bir demo veritabanı
-ve dosya alanında, zamanlanmış yönetim işi olarak çalıştırılmalıdır.
+yeniler ve `APP_UPLOAD_ROOT` içeriğini temizler. Bu nedenle yalnızca yerel demo veritabanı ve
+dosya alanında çalıştırılmalıdır.
 
 ## Raporlama
 
@@ -278,18 +276,6 @@ formüle dönüşmez.
 python -m pytest
 python -m ruff check app tests
 ```
-
-## Üretim ön kontrolü
-
-`APP_ENVIRONMENT=production` ayarlarıyla çalıştırıldığında aşağıdaki komut güvenli production
-yapılandırmasını, upload klasörüne yazma iznini, MSSQL bağlantısını ve migration seviyesini
-doğrular. Herhangi bir kontrol başarısızsa backend süreci başlatılmamalıdır.
-
-```powershell
-python -m app.cli.preflight
-```
-
-Tam Windows/IIS yayın sırası ve kabul listesi için `deployment/README.md` belgesine bakın.
 
 ## Güvenlik notları
 

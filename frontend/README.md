@@ -29,9 +29,8 @@ npm run lint
 npm run build
 ```
 
-Production derlemesi `dist/` klasörüne yazılır. Yayına alırken arayüz ile backend'in aynı
-güvenli origin altında sunulması veya backend CORS/cookie ayarlarının gerçek origin'e göre
-yapılandırılması gerekir.
+Optimize edilmiş yerel doğrulama derlemesi `dist/` klasörüne yazılır. Normal geliştirme için
+`npm run dev`, yerel container ortamı için proje kökündeki Docker Compose komutu kullanılır.
 
 ## Ekranlar
 
